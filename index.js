@@ -1,10 +1,11 @@
-const sharp         = require('sharp');
 const fs            = require('fs');
 const heic_convert  = require('./functions/heic_convert.js');
 const get_ext       = require('./functions/get_ext.js');
 const fileExists    = require('./functions/file_exists.js');
 const ext_lowercase = require('./functions/ext_to_lowercase.js');
 const is_live_mov   = require('./functions/is_live_mov.js');
+const compress      = require('./functions/compress.js');
+const convert_video = require('./functions/convert_video.js');
 
 
 const config = {
@@ -14,6 +15,9 @@ const config = {
     inputFolder: './input',
     outputFolder: './output',
     deleteLiveMOV: true,
+    // Constant Rate Factor (CRF) for video quality. Lower values result in higher quality
+    // but larger file sizes. 22 is a good balance between quality and file size.
+    crf: 22,
 }
 
 async function renameFiles(){
@@ -38,6 +42,7 @@ async function main(){
     
     // Read the contents of the folder synchronously
     const files = fs.readdirSync(config.inputFolder);
+    const allowedVideoExtensions = ['.mp4', '.mov', '.avi', '.mkv', '.webm', '.mpeg',];
     
     
     console.log("Starting to convert and compress files");
@@ -49,6 +54,18 @@ async function main(){
                 if(config.deleteLiveMOV && is_live_mov(file)){
                     fs.unlinkSync(file);
                 }
+
+                if(!is_live_mov(file)){
+                    if(allowedVideoExtensions.includes(get_ext(file))){
+                        convert_video(file, `${config.outputFolder}/${files[i].replace(get_ext(file), '.mp4')}`, err => {
+                            if (err) {
+                                console.error('Conversion failed:', err);
+                            } else {
+                                console.log('FFmpeg successful:', files[i]);
+                            }
+                        }, config.crf);
+                    }
+                }
                 break;
             case '.heic':
                 heic_convert(
@@ -58,6 +75,27 @@ async function main(){
                 
                 ).then(() => {console.log('Finished converting:', files[i].replace('.heic', '.jpg'))});
 
+                break;
+            default:
+                const allowedPictureExt = ['.png', '.jpg', '.jpeg', '.webp', '.avif', '.tiff', '.gif'];
+
+                if(allowedVideoExtensions.includes(get_ext(file))){
+                    convert_video(file, `${config.outputFolder}/${files[i].replace(get_ext(file), '.mp4')}`, err => {
+                        if (err) {
+                            console.error('Conversion failed:', err);
+                        } else {
+                            console.log('FFmpeg successful:', files[i]);
+                        }
+                    }, config.crf);
+                }
+
+                if(!allowedPictureExt.includes(get_ext(file))){
+                    console.log(`${files[i]} is not in the supported file extension array!`);
+                    break;
+                }
+
+                compress(file, `${config.outputFolder}/${files[i]}`, config.compressionOptions).then(() => console.log('Finished compressing: ', files[i]));
+                
                 break;
         }
     }
@@ -69,9 +107,3 @@ async function main(){
 
 main();
 
-// Compress the image
-// sharp(inputFile)
-//   .jpeg(compressionOptions)
-//   .toFile(outputFile)
-//   .then(() => console.log('Image compressed successfully'))
-//   .catch(err => console.error('Error compressing image:', err));
