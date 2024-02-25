@@ -1,27 +1,34 @@
-const sharp = require('sharp');
-const fs = require('fs');
-const { promisify } = require('util');
-const convert = require('heic-convert');
+const sharp     = require('sharp');
+const fs        = require('fs');
+const hc        = require('./functions/heic_convert.js');
+const get_ext   = require('./functions/get_ext.js');
 
-const inputFile = 'IMG_1645.HEIC';
-const outputFile = 'IMG_1645.jpg';
 
 // Define compression settings
-const compressionOptions = {
-    quality: 70 // Adjust quality as needed (0 to 100)
-};
+const config = {
+    compressionOptions: {
+        quality: 70 // Adjust quality as needed (0 to 100)
+    },
+    inputFolder: './input',
+    outputFolder: './output',
+    deleteLiveMOV: true,
+}
 
 
-(async () => {
-    const inputBuffer = await promisify(fs.readFile)(inputFile);
-    const outputBuffer = await convert({
-      buffer: inputBuffer, // the HEIC file buffer
-      format: 'JPEG',      // output format
-      quality: 0.7           // the jpeg compression quality, between 0 and 1
-    });
-  
-    await promisify(fs.writeFile)('./result.jpg', outputBuffer);
-})();
+async function main(){
+    // Read the contents of the folder synchronously
+    const files = fs.readdirSync(config.inputFolder);
+
+    // Log the list of files
+    console.log(files);
+
+    for(i = 0; i < files.length; i++){
+        console.log(get_ext(`${config.input}/${files[i]}`));
+    }
+}
+
+
+main();
 
 // Compress the image
 // sharp(inputFile)
