@@ -7,7 +7,6 @@ const is_live_mov   = require('./functions/is_live_mov.js');
 const compress      = require('./functions/compress.js');
 const convert_video = require('./functions/convert_video.js');
 
-
 const config = {
     compressionOptions: { // Define compression settings
         quality: 70 // Adjust quality as needed (0 to 100)
@@ -17,7 +16,7 @@ const config = {
     deleteLiveMOV: true,
     // Constant Rate Factor (CRF) for video quality. Lower values result in higher quality
     // but larger file sizes. 22 is a good balance between quality and file size.
-    crf: 100,
+    crf: 22,
 }
 
 async function renameFiles(){
@@ -57,13 +56,7 @@ async function main(){
 
                 if(!is_live_mov(file)){
                     if(allowedVideoExtensions.includes(get_ext(file))){
-                        convert_video(file, `${config.outputFolder}/${files[i].replace(get_ext(file), '.mp4')}`, err => {
-                            if (err) {
-                                console.error('Conversion failed:', err);
-                            } else {
-                                console.log('FFmpeg successful:', files[i]);
-                            }
-                        }, config.crf);
+                        await convert_video(file, `${config.outputFolder}/${files[i].replace(get_ext(file), '.mp4')}`, config.crf);
                     }
                 }
                 break;
@@ -80,21 +73,16 @@ async function main(){
                 const allowedPictureExt = ['.png', '.jpg', '.jpeg', '.webp', '.avif', '.tiff', '.gif'];
 
                 if(allowedVideoExtensions.includes(get_ext(file))){
-                    convert_video(file, `${config.outputFolder}/${files[i].replace(get_ext(file), '.mp4')}`, err => {
-                        if (err) {
-                            console.error('Conversion failed:', err);
-                        } else {
-                            console.log('FFmpeg successful:', files[i]);
-                        }
-                    }, config.crf);
-                }
+                    await convert_video(file, `${config.outputFolder}/${files[i].replace(get_ext(file), '.mp4')}`, config.crf);
+                }else{
+                    if(!allowedPictureExt.includes(get_ext(file))){
+                        console.log(`${files[i]} is not in the supported file extension array!`);
+                        break;
+                    }
+    
+                    compress(file, `${config.outputFolder}/${files[i]}`, config.compressionOptions).then(() => console.log('Finished compressing: ', files[i]));
 
-                if(!allowedPictureExt.includes(get_ext(file))){
-                    console.log(`${files[i]} is not in the supported file extension array!`);
-                    break;
                 }
-
-                compress(file, `${config.outputFolder}/${files[i]}`, config.compressionOptions).then(() => console.log('Finished compressing: ', files[i]));
                 
                 break;
         }
@@ -106,4 +94,3 @@ async function main(){
 
 
 main();
-
