@@ -4,10 +4,11 @@ const hc            = require('./functions/heic_convert.js');
 const get_ext       = require('./functions/get_ext.js');
 const fileExists    = require('./functions/file_exists.js');
 const ext_lowercase = require('./functions/ext_to_lowercase.js');
+const is_live_mov   = require('./functions/is_live_mov.js');
 
-// Define compression settings
+
 const config = {
-    compressionOptions: {
+    compressionOptions: { // Define compression settings
         quality: 70 // Adjust quality as needed (0 to 100)
     },
     inputFolder: './input',
@@ -33,19 +34,23 @@ async function renameFiles(){
 }
 
 async function main(){
+    await renameFiles(); // make sure all file extensions are lowercase
+    
     // Read the contents of the folder synchronously
     const files = fs.readdirSync(config.inputFolder);
     
-    await renameFiles(); // make sure all file extensions are lowercase
     
-    
-    // for(let i = 0; i < files.length; i++){
-    //     const file = `${config.inputFolder}/${files[i]}`;
+    for(let i = 0; i < files.length; i++){
+        const file = `${config.inputFolder}/${files[i]}`;
 
-    //     switch(get_ext(file)){
-    //         case: '.MOV'
-    //     }
-    // }
+        switch(get_ext(file)){
+            case '.mov':
+                if(config.deleteLiveMOV && is_live_mov(file)){
+                    fs.unlinkSync(file);
+                }
+                break;
+        }
+    }
 }
 
 
