@@ -52,13 +52,15 @@ async function main(){
             case '.mov':
                 if(config.deleteLiveMOV && is_live_mov(file)){
                     fs.unlinkSync(file);
-                }
+                }else{
 
-                if(!is_live_mov(file)){
-                    if(allowedVideoExtensions.includes(get_ext(file))){
-                        await convert_video(file, `${config.outputFolder}/${files[i].replace(get_ext(file), '.mp4')}`, config.crf);
+                    if(!is_live_mov(file)){
+                        if(allowedVideoExtensions.includes(get_ext(file))){
+                            await convert_video(file, `${config.outputFolder}/${files[i].replace(get_ext(file), '.mp4')}`, config.crf);
+                        }
                     }
                 }
+
                 break;
             case '.heic':
                 heic_convert(
@@ -87,8 +89,6 @@ async function main(){
                 break;
         }
     }
-
-    
 
 }
 
