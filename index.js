@@ -1,6 +1,6 @@
 const sharp         = require('sharp');
 const fs            = require('fs');
-const hc            = require('./functions/heic_convert.js');
+const heic_convert  = require('./functions/heic_convert.js');
 const get_ext       = require('./functions/get_ext.js');
 const fileExists    = require('./functions/file_exists.js');
 const ext_lowercase = require('./functions/ext_to_lowercase.js');
@@ -40,6 +40,7 @@ async function main(){
     const files = fs.readdirSync(config.inputFolder);
     
     
+    console.log("Starting to convert and compress files");
     for(let i = 0; i < files.length; i++){
         const file = `${config.inputFolder}/${files[i]}`;
 
@@ -49,8 +50,20 @@ async function main(){
                     fs.unlinkSync(file);
                 }
                 break;
+            case '.heic':
+                heic_convert(
+                    file, 
+                    `${config.outputFolder}/${files[i].replace('.heic', '.jpg')}`,
+                    config.compressionOptions.quality
+                
+                ).then(() => {console.log('Finished converting:', files[i].replace('.heic', '.jpg'))});
+
+                break;
         }
     }
+
+    
+
 }
 
 
