@@ -17,7 +17,7 @@ const config = {
     deleteLiveMOV: true,
     // Constant Rate Factor (CRF) for video quality. Lower values result in higher quality
     // but larger file sizes. 22 is a good balance between quality and file size.
-    crf: 22,
+    crf: 100,
 }
 
 async function renameFiles(){

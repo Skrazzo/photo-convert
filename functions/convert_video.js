@@ -5,7 +5,7 @@ function convert_video(inputFilePath, outputFilePath, callback, crf = 22) {
     .videoCodec('libx264')
     .audioCodec('aac')
     .audioBitrate('128k')
-    .outputOptions(['-preset slow', '-crf 22'])
+    .outputOptions(['-preset slow', `-crf ${crf}`])
     .on('end', () => {
       callback(null);
     })
