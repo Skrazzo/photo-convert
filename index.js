@@ -17,6 +17,7 @@ const config = {
     // Constant Rate Factor (CRF) for video quality. Lower values result in higher quality
     // but larger file sizes. 22 is a good balance between quality and file size.
     crf: 22,
+    compressMinLimit: 1, // files under MB wont be compressed
 }
 
 async function renameFiles(){
@@ -66,8 +67,8 @@ async function main(){
                 heic_convert(
                     file, 
                     `${config.outputFolder}/${files[i].replace('.heic', '.jpg')}`,
-                    config.compressionOptions.quality
-                
+                    config.compressionOptions.quality,
+                    config.compressMinLimit
                 ).then(() => {console.log('Finished converting:', files[i].replace('.heic', '.jpg'))});
 
                 break;
@@ -82,7 +83,7 @@ async function main(){
                         break;
                     }
     
-                    compress(file, `${config.outputFolder}/${files[i]}`, config.compressionOptions).then(() => console.log('Finished compressing: ', files[i]));
+                    compress(file, `${config.outputFolder}/${files[i]}`, config.compressionOptions, config.compressMinLimit).then(() => console.log('Finished compressing: ', files[i]));
 
                 }
                 
